@@ -409,4 +409,3 @@ class GoBoard(object):
             return 'pass'
         row, col = divmod(point, self.NS)
         return row, col
-

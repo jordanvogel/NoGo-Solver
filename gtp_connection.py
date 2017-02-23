@@ -11,6 +11,7 @@ from board import GoBoard
 from board_util import GoBoardUtil, BLACK, WHITE, EMPTY, BORDER, FLOODFILL
 import numpy as np
 import re
+import time
 
 class GtpConnection():
 
@@ -30,6 +31,10 @@ class GtpConnection():
         self.go_engine = go_engine
         self.komi = 0
         self.board = GoBoard(7)
+        self.toPlay = 'b'
+        self.timelimit = 1
+        self.starttime = time.process_time()
+        self.timeUsed = 0
         self.commands = {
             "protocol_version": self.protocol_version_cmd,
             "quit": self.quit_cmd,
@@ -45,7 +50,9 @@ class GtpConnection():
             "list_commands": self.list_commands_cmd,
             "play": self.play_cmd,
             "final_score": self.final_score_cmd,
-            "legal_moves": self.legal_moves_cmd
+            "legal_moves": self.legal_moves_cmd,
+            "solve":self.solve,
+            "timelimit":self.timelimit_cmd
         }
 
         # used for argument checking
@@ -57,7 +64,8 @@ class GtpConnection():
             "set_free_handicap": (1, 'Usage: set_free_handicap MOVE (e.g. A4)'),
             "genmove": (1, 'Usage: genmove {w, b}'),
             "play": (2, 'Usage: play {b, w} MOVE'),
-            "legal_moves": (1, 'Usage: legal_moves {w, b}')
+            "legal_moves": (1, 'Usage: legal_moves {w, b}'),
+            "timelimit":(1, 'Usage: timelimit INT')
         }
     
     def __del__(self):
@@ -268,6 +276,7 @@ class GtpConnection():
         except Exception as e:
             self.respond('Error: {}'.format(str(e)))
 
+
     def play_cmd(self, args):
         """
         play a move as the given color
@@ -293,6 +302,10 @@ class GtpConnection():
                 return
             if not self.board.move(move, color):
                 return
+            if board_color == 'b':
+                self.toPlay = 'w'
+            else:
+                self.toPlay = 'b'
             self.respond()
         except Exception as e:
             self.respond("illegal move: {} {} {}".format(board_color, board_move, str(e)))
@@ -314,10 +327,11 @@ class GtpConnection():
         """
         try:
             board_color = args[0].lower()
+            self.toPlay = board_color
             color = GoBoardUtil.color_to_int(board_color)
             move = self.go_engine.get_move(self.board, color)
             if move is None:
-                self.respond("pass")
+                self.respond("resign")
                 return
 
             if not self.board.check_legal(move, color):
@@ -331,7 +345,70 @@ class GtpConnection():
             self.debug_msg("Move: {}\nBoard: \n{}\n".format(move, str(self.board.get_twoD_board())))
             move = self.board._point_to_coord(move)
             board_move = GoBoardUtil.format_point(move)
+            if self.toPlay == 'b':
+                self.toPlay = 'w' 
+            else:
+                self.toPlay = 'b'
             self.respond(board_move)
         except Exception as e:
             self.respond('Error: {}'.format(str(e)))
+
+    def timelimit_cmd(self, args):
+        self.timelimit = int(args[0])
+        self.respond()
+
+
+    def search(self, color, board):
+        legalMoves = GoBoardUtil.generate_legal_moves(self.board, color)
+        legalMoves = legalMoves.split(' ')
+        
+        if len(legalMoves) > 1:
+            for child in legalMoves:
+                move = GoBoardUtil.move_to_coord(child, board.size)
+                if move:
+                    move = self.board._coord_to_point(move[0], move[1])
+
+                board.move(move, color)
+                switchColor = GoBoardUtil.opponent(color)
+                self.search(switchColor, board)
+
+        elif len(legalMoves) == 1:
+            return color
+        
+        else:
+            switchColor = GoBoardUtil.opponent(color)
+            return switchColor
+
+    def solve(self, args):
+        newBoard = self.board.copy()
+        board_color = args[0].lower()
+        color = GoBoardUtil.color_to_int(board_color)
+        self.search(color, newBoard)
+        # legalMoves = GoBoardUtil.generate_legal_moves(self.board, color)
+        # legalMoves = legalMoves.split(' ')
+        
+        # if len(legalMoves) > 1:
+        #     for child in legalMoves:
+        #         move = GoBoardUtil.move_to_coord(child, newBoard.size)
+        #         if move:
+        #             move = self.board._coord_to_point(move[0], move[1])
+
+        #         newBoard.move(move, color)
+        #         switchColor = GoBoardUtil.opponent(color)
+        #         self.search(switchColor, newBoard)
+
+        # elif len(legalMoves) == 1:
+        #     return color
+        
+        # else:
+        #     switchColor = GoBoardUtil.opponent(color)
+        #     return switchColor
+
+
+    def winForBlack(state,self):
+        result = evaluate(state)
+        if state.to_play == "b":
+            return result
+        else:
+            return not result
 
