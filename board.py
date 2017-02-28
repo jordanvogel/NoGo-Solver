@@ -409,3 +409,10 @@ class GoBoard(object):
             return 'pass'
         row, col = divmod(point, self.NS)
         return row, col
+
+    def assign(self,board,move,color):
+        '''
+        Assigns a board state to "step back" out of a level of the search
+        '''
+        self.board[move] = color
+        return board

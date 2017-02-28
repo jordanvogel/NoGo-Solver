@@ -8,7 +8,7 @@ import numpy as np
 class GoBoardUtil(object):
 
     @staticmethod
-    def generate_legal_moves(board, color):
+    def generate_legal_moves(board, color, flag):
         """
         generate a list of legal moves
 
@@ -19,23 +19,32 @@ class GoBoardUtil(object):
         color : {'b','w'}
             the color to generate the move for.
         """
+
+        illegal_moves = []
         moves = board.get_empty_positions(color)
+
         num_moves = len(moves)
         np.random.shuffle(moves)
-        illegal_moves = []
+        
 
         for i in range(num_moves):
             if board.check_legal(moves[i], color):
                 continue
             else:
                 illegal_moves.append(i)
+
         legal_moves = np.delete(moves, illegal_moves)
+        moves = []
         gtp_moves = []
         for point in legal_moves:
             x, y = board._point_to_coord(point)
+            moves.append(point)
             gtp_moves.append(GoBoardUtil.format_point((x, y)))
         sorted_moves = ' '.join(sorted(gtp_moves))
-        return sorted_moves
+        if flag == False:
+            return sorted_moves
+        else:
+            return sorted(moves)
             
     @staticmethod       
     def generate_random_move(board, color):
