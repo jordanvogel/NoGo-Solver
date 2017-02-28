@@ -1,0 +1,73 @@
+10 timelimit 10
+#? []
+# Checking that this doesnt break
+
+boardsize 1
+clear_board
+20 solve
+#?[w]
+# checking if it detects winners properly on a boardsize 1
+
+boardsize 2
+clear_board
+play b a2
+play b b1
+30 solve
+#? [b]
+# checking solver on size 2 board where only suicides are available
+
+
+40 genmove w
+#? [resign]
+# making sure white quits like it should when it cant play
+
+
+boardsize 7
+clear_board
+timelimit 1
+50 solve
+#? [unknown]
+# making sure timer works or maybe my solver is instant?!
+
+boardsize 2
+clear_board
+timelimit 5
+60 solve
+#? [b a1]
+
+boardsize 3
+clear_board
+timelimit 20
+70 solve
+#? [b a1]
+# this should pass with some spare time
+
+boardsize 4
+clear_board
+timelimit 10
+play b b2
+play b c1
+play b c3
+play b d1
+play b a4
+play b a1
+play w d4
+play w d3
+play w c4
+play w a2
+play w b4
+80 solve
+#? [b b1]
+# playing around an eye
+
+boardsize 2
+clear_board
+play b b1
+90 solve
+#? [b]
+# black better win this
+
+
+100 genmove w
+#?[w b2|w a1|w a2]
+#only moves left to play for white
