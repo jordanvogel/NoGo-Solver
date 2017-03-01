@@ -1,0 +1,78 @@
+Script started on Tue 28 Feb 2017 08:09:33 PM MST
+camclean@ug08:~/Desktop>cp ~/Downloads/a2.tgz .
+camclean@ug08:~/Desktop>ll
+total 13
+-rw-------+ 1 camclean ugrad 8696 Feb 28 20:09 a2.tgz
+-rwx------+ 1 camclean ugrad 2191 Nov 20  2014 steam.desktop
+-rw-------+ 1 camclean ugrad    0 Feb 28 20:09 typescript
+drwx------+ 4 camclean ugrad    4 Sep 21  2015 usr
+camclean@ug08:~/Desktop>tar zxfp a2.tgz 
+camclean@ug08:~/Desktop>ll
+total 14
+drwxr-xr-x+ 2 camclean ugrad   10 Feb 28 19:26 NoGo2
+-rw-------+ 1 camclean ugrad 8696 Feb 28 20:09 a2.tgz
+-rwx------+ 1 camclean ugrad 2191 Nov 20  2014 steam.desktop
+-rw-------+ 1 camclean ugrad    0 Feb 28 20:09 typescript
+drwx------+ 4 camclean ugrad    4 Sep 21  2015 usr
+camclean@ug08:~/Desktop>cd NoGo2/
+camclean@ug08:~/Desktop/NoGo2>ll
+total 14
+-rwxrwx--- 1 camclean ugrad   820 Feb 28 16:20 Go1.py
+-rwxrwx--- 1 camclean ugrad 11851 Feb 28 16:20 board.py
+-rwxrwx--- 1 camclean ugrad  5267 Feb 28 16:20 board_util.py
+-rwxrwx--- 1 camclean ugrad 14234 Feb 28 19:10 gtp_connection.py
+-rwxrwx--- 1 camclean ugrad  1048 Feb 28 16:20 nogosolvertest.gtp
+-rwxrwx--- 1 camclean ugrad  1328 Feb 22 15:52 public-tests-nogo-solve.gtp
+camclean@ug08:~/Desktop/NoGo2>/cshome/c496/usr/local/bin/gogui-regress g[KGo1.py ~/D[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[Kcat ~/Downloads/a2-sample.gtp 
+boardsize 2
+clear_board
+
+10 solve
+#? [b a1|b a2|b b1|b b2]
+# All four moves win so all these are correct answers
+
+play b a1
+
+20 solve
+#? [b]
+# comment: It was white's turn but white loses, so we do not write a move
+
+play w a2
+
+30 solve
+#? [b b1]
+
+boardsize 7
+clear_board
+
+40 solve
+#? [unknown]
+# too hard to solve
+
+timelimit 100
+
+50 solve
+#? [unknown]
+# Still too hard to solve
+
+boardsize 2
+clear_board
+
+play b b2
+play w a1
+# comment: the command line session has genmove's here, which can return several different correct moves. But we cannot
+# do the remaining tests if we do not know the response here.
+
+60 genmove b
+#? [a2|b1]
+# both moves win for b
+
+70 genmove w
+#? [resign]
+# white has no legal move
+camclean@ug08:~/Desktop/NoGo2>/cshome/c496/usr/local/bin/gogui-regress Go1.py a[K~/Downloads/a2-sample.gtp 
+camclean@ug08:~/Desktop/NoGo2>/cshome/c496/usr/local/bin/gogui-regress Go1.py nogosolvertest.gtp 
+camclean@ug08:~/Desktop/NoGo2>exit
+exit
+
+Script done on Tue 28 Feb 2017 08:12:55 PM MST
