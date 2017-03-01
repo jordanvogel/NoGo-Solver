@@ -12,6 +12,7 @@ import numpy as np
 import re
 import time
 import copy
+import random
 
 class GtpConnection():
 
@@ -69,7 +70,7 @@ class GtpConnection():
             "timelimit": (1, 'Usage: timelimit INT')
 
         }
-    
+
     def __del__(self):
         sys.stdout = self.stdout
 
@@ -110,7 +111,7 @@ class GtpConnection():
         if not elements:
             return
         command_name = elements[0]; args = elements[1:]
-        
+
         if command_name == "play" and self.argmap[command_name][0] != len(args):
             self.respond('illegal move: {} wrong number of arguments'.format(args[0]))
             return
@@ -302,7 +303,7 @@ class GtpConnection():
                 return
             if not self.board.move(move, color):
                 return
-            if board_color == 'b':    
+            if board_color == 'b':
                 self.toPlay = 'w'
             else:
                 self.toPlay = 'b'
@@ -330,6 +331,7 @@ class GtpConnection():
             self.toPlay = board_color
             color = GoBoardUtil.color_to_int(board_color)
             move = self.search(self.board,color)
+            # Move was found
             if move[0] == True:
                 self.debug_msg("Move: {}\nBoard: \n{}\n".format(move[1], str(self.board.get_twoD_board())))
                 if self.toPlay == 'b':
@@ -340,6 +342,7 @@ class GtpConnection():
                 x,y = self.board._point_to_coord(move[1])
                 test = GoBoardUtil.format_point((x, y))
                 self.respond(args[0]+" "+test)
+            # There are no legal moves left to play
             elif move[0] == False:
                 test = self.go_engine.get_move(self.board, color)
                 if test is None:
@@ -350,6 +353,18 @@ class GtpConnection():
                     x,y = self.board._point_to_coord(test)
                     test = GoBoardUtil.format_point((x, y))
                     self.respond(args[0]+" "+test)
+            # Search ran out of time
+            elif move == 'unknown':
+                random_move = random.choice(GoBoardUtil.generate_legal_moves(self.board, color, True))
+                self.debug_msg("Move: {}\nBoard: \n{}\n".format(random_move, str(self.board.get_twoD_board())))
+                if self.toPlay == 'b':
+                    self.toPlay = 'w'
+                else:
+                    self.toPlay = 'b'
+                self.board.assign(self.board,random_move, color)
+                x,y = self.board._point_to_coord(random_move)
+                test = GoBoardUtil.format_point((x, y))
+                self.respond(args[0]+" "+test)
         except Exception as e:
             self.respond('Error: {}'.format(str(e)))
 
@@ -414,4 +429,3 @@ class GtpConnection():
             if not success[0]:
                 return False, False
         return True, True
-
