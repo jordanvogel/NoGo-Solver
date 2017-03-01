@@ -364,7 +364,7 @@ class GtpConnection():
                 self.board.assign(self.board,random_move, color)
                 x,y = self.board._point_to_coord(random_move)
                 test = GoBoardUtil.format_point((x, y))
-                self.respond(args[0]+" "+test)
+                self.respond(test)
         except Exception as e:
             self.respond('Error: {}'.format(str(e)))
 
